@@ -1,17 +1,22 @@
 """PyAudio Example: Play a WAVE file."""
 
 import pyaudio
-import audiolab, scipy
 import wave
 import sys
-
+from pydub import AudioSegment
 CHUNK = 1024
 
 # if len(sys.argv) < 2:
 #     print("Plays a wave file.\n\nUsage: %s filename.wav" % sys.argv[0])
 #     sys.exit(-1)
-w1 = wave.open("cow2.wav", "rb")
-w2 = wave.open("cat_meow2", "rb")
+#w1 = wave.open("cow2.wav", "rb")
+
+
+#splitting audio into multiple pieces
+# sound = AudioSegment.from_mp3("161112_001.mp3")
+# sound.export("./1112", format="wav")
+
+w1 = wave.open("chunk0.wav", "rb")
 
 p = pyaudio.PyAudio()
 

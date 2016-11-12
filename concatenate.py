@@ -10,7 +10,9 @@ CHUNK = 1024
 # if len(sys.argv) < 2:
 #     print("Plays a wave file.\n\nUsage: %s filename.wav" % sys.argv[0])
 #     sys.exit(-1)
-infiles = ["cat_meow2.wav", "cow2.wav"]
+
+#infiles = ["cow2.wav", "cat_meow2.wav", ]
+infiles = ["chunk0.wav", "chunk1.wav"]
 outfile = "result.wav"
 
 with closing( wave.open( outfile, 'wb' ) ) as output:
@@ -38,22 +40,22 @@ with closing( wave.open( outfile, 'wb' ) ) as output:
 #output.close()
 #========================================
 
-# w = wave.open("result.wav", "rb")
-# p = pyaudio.PyAudio()
-# stream = p.open( format = p.get_format_from_width( w.getsampwidth() ),
-#                 channels = w.getnchannels(),
-#                 rate = w.getframerate(),
-#                 output = True )
-# data1 = w.readframes( CHUNK )
+w = wave.open("result.wav", "rb")
+p = pyaudio.PyAudio()
+stream = p.open( format = p.get_format_from_width( w.getsampwidth() ),
+                channels = w.getnchannels(),
+                rate = w.getframerate(),
+                output = True )
+data1 = w.readframes( CHUNK )
 
-# while data1 != '':
-#     stream.write( data1 )
-#     data1 = w.readframes( CHUNK )
+while data1 != '':
+    stream.write( data1 )
+    data1 = w.readframes( CHUNK )
 
-# stream.stop_stream()
-# stream.close()
+stream.stop_stream()
+stream.close()
 
-# p.terminate()
+p.terminate()
 
 
 
