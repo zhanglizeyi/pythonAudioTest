@@ -11,8 +11,8 @@ CHUNK = 1024
 #     print("Plays a wave file.\n\nUsage: %s filename.wav" % sys.argv[0])
 #     sys.exit(-1)
 
-#infiles = ["cow2.wav", "cat_meow2.wav", ]
-infiles = ["chunk0.wav", "chunk1.wav"]
+infiles = ["cat_meow2.wav", "cat_meow2.wav", ]
+#infiles = ["chunk0.wav", "chunk1.wav"]
 outfile = "result.wav"
 
 with closing( wave.open( outfile, 'wb' ) ) as output:

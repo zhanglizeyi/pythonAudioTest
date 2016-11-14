@@ -1,0 +1,3 @@
+I am Meiyi He. This is a text file to test if I can split it up nicely!
+There are many distinct words here, also many strange deliminators.
+For example: the question mark is also exist ? 
