@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
 	#print dictionary
 
-	sorted_dict = sorted( dictionary.items(), key = operator.itemgetter(1) )
+	sorted_dict = sorted( dictionary.items(), key = lambda x: (-x[1], x[0]))
 	#dictionary = 
 	newList = sorted_dict
 
