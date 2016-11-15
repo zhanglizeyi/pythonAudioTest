@@ -1,0 +1,211 @@
+***** ICCAD-2016 Jiajia LI
+
+
+SLIDE
+My topic for today’s presentation is flop tray-based low-power optimization.
+ 
+SLIDE
+This slide shows the outline of my talk. I will first describe the background and motivation. Then I will revisit the related works. After that, I will present our methodology. Then, I will present experimental setup and results. Last, I will give the conclusion and future works.
+ 
+SLIDE
+Here, a flop tray is a multi-bit flop-flop.
+Application of flop trays can significantly reduce the number of clock tree sinks, thus clock power and wirelength.
+As a simple calculation, if we replace all single-bit flops with 64-bit flop trays in a clock tree, we can reduce the number of clock buffers by 98.4%.
+Further, if we assume a clock tree with 100K sinks and fanout of eight at each level, by using 64-bit flop trays, we can reduce the tree height from six to four.
+ 
+From the example, we see that using flop trays can significantly reduce clock buffers and clock power.
+I will show additional benefits from flop trays.
+ 
+SLIDE
+This figure shows a single-bit flip-flop.
+We see that each flop generates its own clock signals with two inverters.
+In a flop tray, inverters for clock signals can be shared, which reduces flop power and area.
+As an example, a recent work achieves 22% flop power reduction by using 2-bit and 4-bit flop trays.
+ 
+However, implementation of flop tray-based design is not trivial. I will show several challenges in the following slides.
+ 
+SLIDE
+First, flops occupy large portion of area. For example, in one of our testcases, vga, 30% of instances are flops, which takes 51% of the block area.
+Second, flop trays can have high aspect ratio and distinct sizes. As shown in the bottom figure, the 64-bit flop trays which are in orange, have very high aspect ratio.
+Third, clustering of flops for flop tray generation imposes additional placement constraints.
+If we only use small flop trays, we do not fully exploit the benefits. On the other hand, using large flop trays may sacrifice datapath wirelength and power.
+This figure shows power and wirelength overheads on datapath from a logical clustering flow, where we use commercial tools to cluster flops during synthesis. We can see up to 40% increase in wirelength, and up to 16% increase in datapath power.
+Therefore, we must ensure that the benefits of using flop tray outweigh its costs.
+SLIDE
+This slide shows our overall optimization flow. In blue are our proposed optimizations. Based on the synthesized netlist, we first perform an initial placement with only single-bit flops. We consider such a placement solution as optimal placement since there is no additional placement constraints from flop clustering.
+ 
+We the perform flop clustering and generate flop trays. Our objective is to minimize the displacement of flops as well as timing impact on datapath. These indicate that we want to maintain the solution quality of the initial placement as much as possible. We also try to minimize the number of flop trays to reduce clock power.
+ 
+We perform two-step optimization. First step is a capacitated K-means clustering, as shown in the dotted box, in which we generate optimal clustering solutions for each flop tray size. We then perform ILP-based selection to generate a flop tray solution with mixed flop tray sizes. We split the optimization into two steps to reduce the runtime.
+ 
+SLIDE
+There are several works address the flop clustering problem.
+[click] Early-stage flop tray is generated during synthesis.
+[click] So these methods do not address the physical awareness.
+[click] Flop-tray generation during/ after placement is usually beneficial to physical implementation.
+[click] But previous works are mostly based on flop clustering given a feasible displacement region for every flop. These methods do not globally minimize the perturbation to the original placement, and they also ignore the shape of flop trays and path timing for combinational cells.
+[click] Our main contribution is flop tray generation considering flop displacements, timing paths and flop tray shapes.
+ 
+SLIDE
+This slide shows an example of our overall flow. The first three figures show the solutions with 4-bit, 16-bit and 64-bit flop trays. The last figure shows a combined solution from our ILP-based optimization. I will give details of our optimization in the following slides.
+ 
+SLIDE
+This slide describes our capacitated K-means clustering. We solve the following problem. Given N points, which are single-bit flops, a capacity K (which is defined by the flop size), we obtain N/K clusters to minimize the total displacement.
+Our flow is shown here.
+ 
+First, we select N/K initial points as centers. In this step, we first randomly select one flop among the single-bit flops. We then calculate the distance from each flop to all selected flops. We use the distance as probabilities to randomly select the next points. We iterative update the probabilities and select points until we select N/K points.
+ 
+We then iteratively perform clustering and center location update. For clustering we formulate a min-cost flow to map single-bit flops to flop tray slots. The figure shows the flow network, where S and T are super source and sink. h are single-bit flops, f are slots on flop trays. The cost between a single-bit flop and a flop tray slot is the Manhattan distance between them. We note that by considering the distance between flops and slots, we are aware of the flop tray aspect ratios. To update the center locations, we formulate a linear program. Our LP simply minimizes the total displacements of flops.
+In our optimization, we iterate between min-cost flow-based clustering and LP-based center location update until the center movement is negligible.
+ 
+SLIDE
+Here is an example of our optimization. In blue are single-bit flops from an initial placement. In red are the center locations or flop tray locations. We use different colors to indicate different clusters.
+ 
+SLIDE
+This slide further compares our solution which understands flop tray aspect ratios versus a solution of the traditional K-means clustering which treats each flop tray as a point. We see that our clustering solution more closely matches the aspect ratio of the flop trays.
+ 
+SLIDE
+Recall that we first generate flop tray solution for each flop tray sizes. We then formulate an integer linear program to combine the solutions. This slide shows our ILP formulation.
+Our goal here is to minimize total displacement of flops, timing impact due to flop clustering and total flop tray cost. Here, W is the total cost of flop trays, which can be estimated based on their area or power, D is the total displacement, and Z is the total relative displacement of timing-critical start-end pairs. We minimize the relative displacement of timing-critical start-end pairs to minimize the timing impact of flop clustering. I will give details in the next slide.
+The first two constraints calculate flop displacement.
+These two constraints estimate total relative-displacement between timing-critical start-end flop pairs.
+This constraint calculates the cost of flop trays, where e is a binary indicator of whether a flop tray is used.
+The last constraint ensures that each flop has exactly on slot to match and each slot can have at most one flop to match.
+ 
+SLIDE
+This slide illustrates our idea on relative displacement.
+For a timing-critical start-end flop pair, relative displacement between them degrades timing. When they are moved apart, the delay will increase due to longer wire. When they are moved closer, there can be congestion in between.
+We therefore want to minimize the relative displacement of timing-critical start-end pairs. This figure shows our optimization results with different beta values. When beta is zero, we do not consider relative displacement. When beta is larger, we assign more weight to relative displacement in our objective function. We see from the result that by considering the relative displacement of timing-critical start-end pairs, we achieve 5% more power reduction.
+ 
+SLIDE
+Now I will present our experimental results.
+This slide shows our experimental setup.
+We perform experiments on four designs from opencores website.  
+We use foundry 28 FDSOI dual-VT library.
+We use Design Compiler for synthesis, and Innovus for physical implementation and analysis.
+The bottom figure show our used flop trays.
+ 
+SLIDE
+This slide shows our experimental results. We compare to two reference flows. Ref_1b is the conventional implementation flow with only single-bit flops. Ref_mb is the flop tray-based implementation with logical clustering during synthesis. Our optimization is  opt_mb.
+We can see that our optimization achieves up to 98% reduction clock tree sink number reduction, and 90% clock power reduction compared to the conventional single-bit flow.
+And 16% more total power reduction compared to the flow with logical clustering.
+ 
+SLIDE
+This slide shows the example layouts before and after flop tray generation. In red are flops and in blue are combinational cells. We can see that different sizes of flop trays are used. For design MPEG, we can also see some white space near flop trays. That’s because flop trays are more area efficient than single-bit flops. This effect may also help to reduce routing congestion.
+ 
+SLIDE
+This slide shows optimization with various flop tray sizes. We create five combinations, with different bounds on the largest tray size. We can see that about 50% of clock power can be reduced by just applying 4-bit flop trays.
+With 16-bit or larger flop trays, we can achieve 11% more clock power reduction on average, especially on large designs.
+ 
+SLIDE
+We further study the useful skew optimization with flop trays. Useful skew is helpful to reduce datapath leakage power. However, application of flop trays will limit the benefits from useful skew optimization. We therefore modified our clustering approach to avoid clustering flops with large difference in desired latencies. This enables skew-awareness.
+From the table, we can see that we achieve similar leakage power compared to a single-bit solution, but at the cost of 21% less sink number reduction compared to our original multi-bit solution.
+ 
+SLIDE
+Some takeaways …
+
+
+
+
+
+
+***** DAC-2015 Kwangsoo HAN (?) CTS talk
+
+
+Slide 1:
+Thank you for the introduction. My topic for today’s presentation is multi-mode multi-corner skew variation reduction.
+ 
+Slide 2:
+This slide shows the outline of my talk. In the talk, I will first give the motivation. Then I will review the related works. After that, I will describe our optimization framework. Last, I will present our experimental results.
+ 
+Slide 3:
+In these days, there are dozens or even more than one hundred signoff corners in a modern SoC design. Clock skew, which is defined as the delay difference between launch and capture paths, varies across different corners. And such clock skew variation can lead to ping-pong effect. That is, fixing timing issues at one corner leads to timing violation at others.
+This figure shows one example. At low voltage, gate delay dominates. So that capture path has longer delay than that of the launch path. At high voltage, wire delay dominates and launch path has larger delay. We see that the skew value changes from a negative value to a positive value in this case. Such skew reversal can increase the difficulty for timing closure, where the buffer insertion and sizing can lead to power and area overheads.
+Therefore, in this work, we want to minimize the skew variation.
+ 
+Slide 4:
+Now, I will review the related works.
+ 
+Slide 5:
+Related works can be classified into two categories. The first category minimizes clock skew at multiple corners.
+[Cho05] performs temperature-aware skew reduction based on an improved DME.
+[Lung10] minimizes the worst clock skew across corners with delay correlation factors characterized based on buffer delays.
+The second category minimizes skew variation across corners.
+Several early literatures propose non-tree structures.
+[Restle01] proposes a two-level non-tree structure, in which mesh is applied at the bottom level and tree is used at the top-level. 
+To reduce clock power, [Su01] uses mesh for top-level and tree for bottom level.
+[Rajaram04] inserts crosslinks in a clock tree to minimize the skew variation across corners.
+Our work focuses on clock tree. We propose a systematic optimization framework for minimization of clock skew variation.
+ 
+Slide 6:
+This slide formulates our skew variation reduction problem.
+Recall that for a given clock tree, we define clock skew as the difference between delays from root to sinks. And we know that skew can be different at a different corner.
+We then define the skew variation between a corner pair as the normalized difference between two skew values as shown in the equation, in which alpha is the normalization factor.
+We then define the maximum skew variation for a sink pair as the largest skew variation among all corner pairs.
+Based on the above, we formulate the skew variation reduction problem as: given a routed clock tree, we minimize the sum over all sink pairs of the maximum skew variation, which is shown in the bottom equation.
+ 
+Slide 7:
+Now I will describe our optimization framework.
+ 
+Slide 8:
+Our framework performs incremental optimization of a CTS solution.
+We perform both global and local optimization as follows.
+For a given clock tree, the global optimization uses linear program to determine desired delta delays on arcs. Here, an arc is a tree segment without branching. Yellow ovals indicate the arcs in the example.
+Based on the LP solution, we insert or remove buffers, and detour wires based on LUTs to meet the desired delta delay.
+Then the local optimization performs iterative local moves to further reduce skew variation.
+For a given target buffer, local moves include sizing and displacement of the target buffer and its child buffers as shown in green oval. We explore different candidate local moves and pick the one with the maximum skew variation reduction.
+This flow chart shows our optimization flow. I will give details for each optimization in the following slides.
+ 
+ 
+ 
+ 
+Slide 9:
+This slide shows our LP formulation for the global optimization. Recall that the LP determines the delta delay on each arc at each corner. And an arc is a tree segment without branching. We then based on characterized LUTs to insert and remove buffers as well as detour wires to meet the desired delta delay.
+However, due to the discreteness of buffer delays, our LP formulation must comprehend the ECO feasibility.
+Our objective function minimizes total delta delays at all corners, which implicitly minimizes the number of ECO changes, so as to increase the likelihood that the solution is practically implementable.
+We specify an upper bund U of the sum of maximum skew variation over all sink pairs. In the optimization, we sweep U to search for a solution with the minimum skew variation.
+Constraint (3) ensures that there is no skew degradation in the optimized clock tree.
+(4) is the maximum clock latency constraint.
+Constraint (5) specifies the minimum delay of an arc which is calculated based on optimal buffer insertion and Manhattan distance between the source and sink of the arc.
+(6) constrains the range of delay ratios between different corners based on the characterized LUTs.
+As a summary, constraint (2) minimizes skew variation, and (1), (5) and (6) improve ECO feasibility. In other words, (5) and (6) exclude the solutions that are not in our LUTs.
+ 
+Slide 10:
+Now I will give details on our local optimization.
+ 
+Slide 11:
+Recall that we perform iterative local moves to minimize skew variation. We use three types of local moves. First, we displace the target buffer in eight directions and size the buffer. Second, we displace the target buffer and size its child buffer. Third, we re-assign the target buffer to a new driver.
+However, each move will need placement legalization, ECO routing, RC extraction and timing analysis. And, each buffer can have around a hundred candidate moves. It is impossible to try all the moves. Then, which move is the best one? Our solution is to use a machine-learning based model to find the best move.   
+/// recorded the whole thing, and then the second paragraph in pieces (with pause between pieces → one .mp3 file that contains the “whole thing” followed by the “pieces”
+
+
+ 
+Slide 12:
+We propose a machine-learning based model to predict driver-to-fanout latency change due to local moves.
+For each local move, we first use analytical models to predict the delta delays. We use FLUTE and construct single trunk Steiner tree to estimate routing pattern change. We use Liberty LUTs to estimate cell delay change. We use Elmore delay and D2M model to estimate wire delay change.
+We then feed the estimated delta delay values from analytical models to our machine-learning based model.
+This figure shows the accuracy comparison between analytical models and our learning-based model. There are 114 buffers and each buffer has 45 candidate moves. The X-axis is number of attempts on each buffer. Each attempt is a local move. Y-axis is the percentage of buffers identified to have the best move.
+We see from the result that our learning-based model, which is the yellow trace, can identify best moves for more buffers with less number of attempts.
+ 
+Slide 13:
+Now let me present our experimental results.
+ 
+Slide 14:
+We perform experiments at foundry 28LP technology. We use IC Compiler to generate initial clock tree. We develop two types of testcases under the guidance from our industrial colleague. Such large blocks show issue with skew variation in their clock trees at 28nm.
+This table shows the used corners.
+ 
+Slide 15:
+This table shows our experimental results. From 512ns to 399ns, our proposed optimization achieves up to 22% reduction on sum of skew variation over all sink pairs. Similar values between pairs of lines indicate that our solution has no skew degradation. Also, the solution shows negligible area and power overhead.
+ 
+Slide 16:
+These two figures show the comparison of skew variation between corner pairs. We see that our optimization significantly reduces the large skew variation between corner pairs.
+ 
+Slide 17:
+Now I will conclude my talk.
+ 
+Slide 18:
+In this work, we propose the first framework to minimize the sum of skew variation over all sink pairs in a clock tree, which achieves up to 22% skew variation reduction.
+Our future works include study resultant power and area benefits and a better prediction for the optimal buffer location.
+ 
+Slide 19:
+Thank you for your attention.

@@ -1,0 +1,7 @@
+45
+
+
+[('text', 1), ('am', 1), ('it', 1), ('meiyi', 1), ('exist', 1), ('are', 1), ('file', 1), ('if', 1), ('for', 1), ('distinct', 1), ('there', 1), ('question', 1), ('mark', 1), ('to', 1), ('strange', 1), ('split', 1), ('deliminators', 1), ('here', 1), ('words', 1), ('nicely', 1), ('he', 1), ('a', 1), ('up', 1), ('this', 1), ('can', 1), ('the', 1), ('example', 1), ('is', 2), ('also', 2), ('i', 2), ('many', 2), ('test', 10)]
+
+
+('distinct', 1)
