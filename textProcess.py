@@ -51,9 +51,22 @@ def analyzer(ifile):
 			# else:
 			# 	print  "< " + str(f)
 			
-			
+	file = file.readlines();
+	tokens = []
+	for i in file:
+		tokens.append([e.lower() for e in map(string.strip, re.split("(\W+)",i)) if len(e) > 0 and not re.match("\W", e)])
+	print tokens
 
+#def storeHash(tokens):
+	
+>>>>>>> 0741b2a2a34286b7b012d8621183adbcd536c0f9
 if __name__ == "__main__":
-	print "Input file path:"
-	ifile = raw_input("Which file? : ");
+	#print "Input file path:"
+	ifile = raw_input("Which file you want to process? ");
 	analyzer(ifile)
+	# print
+	# print
+	# dictionary = {}
+	# for i in range(10):
+	# 	dictionary[i] = chr(ord('a') + i)
+	# print dictionary
