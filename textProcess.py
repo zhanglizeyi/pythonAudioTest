@@ -58,8 +58,6 @@ def analyzer(ifile):
 	print tokens
 
 #def storeHash(tokens):
-	
->>>>>>> 0741b2a2a34286b7b012d8621183adbcd536c0f9
 if __name__ == "__main__":
 	#print "Input file path:"
 	ifile = raw_input("Which file you want to process? ");
