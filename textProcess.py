@@ -1,5 +1,5 @@
 import sys
-import hashTable
+#import hashTable
 import string, os
 import re
 from collections import Counter
@@ -12,16 +12,21 @@ def analyzer(ifile):
 
 
 	file = open(ifile, "r")
-	file = file.read();
-	tokens = [e.lower() for e in map(string.strip, re.split("(\W+)",file)) if len(e) > 0 and not re.match("\W", e)]
-	#print tokens
+	file = file.readlines();
+	tokens = []
+	for i in file:
+		tokens.append([e.lower() for e in map(string.strip, re.split("(\W+)",i)) if len(e) > 0 and not re.match("\W", e)])
+	print tokens
 
-def storeHash(tokens):
+#def storeHash(tokens):
 	
-
-
-
 if __name__ == "__main__":
-	print "Input file path:"
-	ifile = raw_input("Which file? : ");
+	#print "Input file path:"
+	ifile = raw_input("Which file you want to process? ");
 	analyzer(ifile)
+	print
+	print
+	dictionary = {}
+	for i in range(10):
+		dictionary[i] = chr(ord('a') + i)
+	print dictionary
